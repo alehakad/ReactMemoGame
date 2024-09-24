@@ -1,0 +1,71 @@
+### frontend files
+
+# Node modules
+frontend/node_modules/
+# Build output
+frontend/build/
+frontend/dist/
+# Logs
+frontend/logs/
+frontend/*.log
+frontend/npm-debug.log*
+# Dependency directories
+frontend/jspm_packages/
+# Test coverage
+frontend/coverage/
+# Optional npm cache directory
+frontend/.npm
+# Yarn files
+frontend/.yarn-integrity
+frontend/.pnp.*
+# Miscellaneous
+frontend/*.tgz
+frontend/*.swp
+frontend/*.swo
+
+
+### backend files
+
+# Python
+backend/__pycache__/
+backend/*.py[cod]
+backend/*.pyo
+backend/.env
+backend/.env.*
+backend/.venv/
+backend/venv/
+backend/memo_env/
+backend/env/
+backend/env.bak/
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/.flake8
+backend/.idea/
+backend/.vscode/
+backend/.coverage
+backend/.egg-info/
+backend/dist/
+backend/build/
+backend/staticfiles/
+backend/media/
+backend/logs/
+backend/tests/
+
+
+### General files
+
+# IDE specific files
+.idea/
+.vscode/
+.DS_Store
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Temporary files
+tmp/
+temp/

@@ -1,0 +1,33 @@
+services:
+    backend:
+      container_name: flask_app
+      build:
+        context: ./backend
+        dockerfile: Dockerfile
+      
+      # to not rebuild every time
+      volumes:
+        - ./backend/:/app/backend 
+      image: backend:memo
+      restart: on-failure
+      ports:
+        - "5000:5000"
+    frontend:
+      container_name: react_app
+      build:
+        context: ./frontend
+        dockerfile: Dockerfile
+      
+      # to not rebuild every time
+      volumes:
+        - ./frontend/:/app/frontend 
+      image: front:memo
+      restart: on-failure
+      ports:
+        - "3000:3000"
+      environment:
+        - REACT_APP_API_URL=http://backend:5000  # Use the service name as the hostname
+      depends_on:
+        - backend
+      
+  # sudo docker compose up --pull=never

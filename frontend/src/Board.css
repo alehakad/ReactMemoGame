@@ -1,0 +1,127 @@
+/* Main styling for the flip card */
+.flip-card {
+  width: 150px;
+  height: 150px;
+  perspective: 1000px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  /* Smooth scaling on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  /* Subtle shadow around cards */
+}
+
+.flip-card:hover {
+  transform: scale(1.05);
+  /* Slightly enlarges card on hover */
+}
+
+/* Inner content of the flip card */
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  /* Bouncy effect */
+  transform-style: preserve-3d;
+}
+
+/* Rotate the card when it has the 'rotate' class */
+.flip-card-inner.rotate {
+  transform: rotateY(180deg);
+}
+
+/* Front and back of the card */
+.flip-card-front,
+.flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 10px;
+  /* Rounded corners for a softer look */
+}
+
+/* Styling for the front face of the card */
+.flip-card-front {
+  background-color: #bbb;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid #ddd;
+  transition: background-color 0.4s ease;
+}
+
+/* Optional glow effect on the front */
+.flip-card-front:hover {
+  background-color: #f0f0f0;
+  /* Lightens the color on hover */
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+  /* Adds a glow effect */
+}
+
+/* Back of the card */
+.flip-card-back {
+  transform: rotateY(180deg);
+  background: linear-gradient(145deg, #0093E9, #80D0C7);
+  /* Adds a gradient background */
+  border: 2px solid #ccc;
+}
+
+/* Image inside the back face */
+.flip-card-back img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  /* Ensures images follow the rounded corners */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  /* Adds depth to images */
+}
+
+
+/* Button for restarting game (if needed) */
+button.restart-button {
+  padding: 10px 20px;
+  margin-top: 15px;
+  border: none;
+  border-radius: 25px;
+  background: #ff6f61;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 8px rgba(255, 111, 97, 0.3);
+}
+
+button.restart-button:hover {
+  background: #e85a50;
+  transform: scale(1.05);
+}
+
+button.restart-button:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 4px rgba(255, 111, 97, 0.2);
+}
+
+
+/* Status message styling */
+div.status {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  padding: 5px 15px;
+  background: #f9f9f9;
+  border-radius: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: #555;
+}
+
+/* Styling for the table layout */
+table {
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+/* Individual table cell styling */
+td {
+  padding: 5px;
+}
