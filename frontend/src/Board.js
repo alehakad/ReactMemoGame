@@ -32,8 +32,7 @@ export default function Board() {
     const [openedImage, setOpenedImage] = useState(null); // to pause between opening and checking image
     const [pairsFound, setPairsFound] = useState(0);
     const [statusMessage, setStatusMessage] = useState(startStatusMessage);
-    const [notClickable, setNotClickable] = useState(true); // to diallow opening third image
-
+    const [notClickable, setNotClickable] = useState(true); // to diallow opening third image and wait until turn
     const [images, setImages] = useState([]);
 
     const [gameIsActive, setGameIsActive] = useState(true);
@@ -41,7 +40,7 @@ export default function Board() {
     const [gameDuration, setGameDuration] = useState(startGameDuration);
 
     const [timerKey, setTimerKey] = useState(0);
-    const [boardIsSet, setBoardIsSet] = useState(false);
+    const [boardIsSet, setBoardIsSet] = useState(false); // to set board on first message
 
     // initialize game field
     const width = 4;
@@ -74,13 +73,17 @@ export default function Board() {
         if (latestMessage.hasOwnProperty('imageIdx')) {
             const imageIdx = latestMessage.imageIdx;
             if (imageIdx >= 0 && imageIdx <= squares.length) {
-                // flip card
                 setSquares((prevSquares) => {
                     const nextSquares = [...prevSquares];
-                    nextSquares[imageIdx] = !nextSquares[imageIdx]; // Toggle the state of the image at the given index
+                    nextSquares[imageIdx] = latestMessage.isOpen ? true : false;
                     return nextSquares;
                 });
             }
+        }
+
+        // allow clickable to this player 
+        if (latestMessage.hasOwnProperty('canClick')) {
+            setNotClickable(false);
         }
 
     }, [messages]
@@ -101,14 +104,18 @@ export default function Board() {
         const nextSquares = squares.slice();
         nextSquares[idx] = !nextSquares[idx];
         setSquares(nextSquares);
-
-        // send message to webocket
-        sendMessage(JSON.stringify({ imageIdx: idx }));
+        // send open image
+        sendMessage(JSON.stringify({ imageIdx: idx, isOpen: true }));
 
         // check after 2 seconds
         setTimeout(() => {
             if (openedImage !== null) {
                 if (images[openedImage] === images[idx]) {
+
+                    // send message to websocket to open two images
+                    sendMessage(JSON.stringify({ imageIdx: idx, isOpen: true }));
+                    sendMessage(JSON.stringify({ imageIdx: openedImage, isOpen: true }));
+
                     if (pairsFound + 1 === totalPairs) { // won the game
                         setStatusMessage("You won!!");
                         setGameIsActive(false);
@@ -122,9 +129,16 @@ export default function Board() {
                     nextSquares[idx] = false;
                     nextSquares[openedImage] = false;
                     setSquares(nextSquares);
+
+                    // send message to websocket to close two images
+                    sendMessage(JSON.stringify({ imageIdx: idx, isOpen: false }));
+                    sendMessage(JSON.stringify({ imageIdx: openedImage, isOpen: false }));
                 }
                 setOpenedImage(null);
-                setNotClickable(false);
+                setNotClickable(true); // wait until next turn
+
+                // allow to click for other player
+                sendMessage(JSON.stringify({ canClick: true }));
 
             }
         }, 1000);
