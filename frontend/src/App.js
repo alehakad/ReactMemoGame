@@ -10,7 +10,7 @@ const MessagesDisplay = () => {
       <h2>WebSocket Status: {wsStatus}</h2>
       <ul>
         {messages.map((msg, index) => (
-          <li key={index}>{msg}</li>
+          <li key={index}>{JSON.stringify(msg)}</li>
         ))}
       </ul>
     </div>
@@ -19,7 +19,6 @@ const MessagesDisplay = () => {
 
 
 export default function App() {
-
 
   return (
     <WebSocketProvider>

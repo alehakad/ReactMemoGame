@@ -27,14 +27,16 @@ export const WebSocketProvider = ({ children }) => {
         socketRef.current.onopen = () => {
             setIsReady(true);
             setWsStatus("Ready");
-            socketRef.current.send("Hellou");
+            socketRef.current.send(JSON.stringify({message:"Hello"}));
         }
         socketRef.current.onclose = () => {
             setIsReady(false);
             setWsStatus("Closed");
         }
         socketRef.current.onmessage = (event) => {
-            setMessages((prevMessages) => [...prevMessages, event.data]);
+            console.log(event.data);
+            const data = JSON.parse(event.data);
+            setMessages((prevMessages) => [...prevMessages, data]);
         }
         socketRef.current.onerror = () => {
             setIsReady(false);
