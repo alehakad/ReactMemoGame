@@ -56,8 +56,9 @@ class ConnectionManager:
         if client_id in self.active_connections:
             del self.active_connections[client_id]
 
-    async def send_personal_message(self, message: str, websocket: WebSocket):
-        await websocket.send_json({"message":message})
+    async def send_personal_message(self, message: str, client_id: int):
+        print(f"Send Message: {message} to client {client_id}")
+        await self.active_connections[client_id].send_json(message)
 
     async def broadcast_text(self, message: str, client_id):
         for client, connection in self.active_connections.items():
@@ -81,10 +82,13 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
     await app_manager.messages_manager.connect(websocket, client_id)
     # add player
     app_manager.games_config.add_player(client_id)
-    await app_manager.messages_manager.broadcast_json({"type":"points", "players" : app_manager.games_config.get_score_table()})
-    print("Send table")
+    
     if app_manager.games_config.get_n_players() == 2:
-        await app_manager.messages_manager.broadcast_json({"type":"board", "started" : True})
+        # ubblock only second player
+        await app_manager.messages_manager.send_personal_message({"type": "start", "started" : True, "canClick" : True}, client_id)
+        await app_manager.messages_manager.broadcast_json({"type":"start", "started" : True, "canClick" : False}, client_id)
+
+    await app_manager.messages_manager.broadcast_json({"type":"points", "players" : app_manager.games_config.get_score_table()})
 
     try:
         while True:

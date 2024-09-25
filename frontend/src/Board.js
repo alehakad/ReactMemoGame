@@ -49,13 +49,32 @@ export default function Board() {
     const height = 4;
     const totalPairs = width * height / 2;
 
+
+    // start game handles
+    const handleStartMesages = useCallback((latestMessage) => {
+
+        // check if game started
+        if (latestMessage.hasOwnProperty("started")) {
+            console.log("start game");
+            setGameIsActive(true);
+            setStatusMessage(startGameStatusMessage);
+            setNotClickable(false);
+            if (latestMessage.hasOwnProperty('canClick')) {
+                setNotClickable(!latestMessage.canClick);
+            }
+    
+        }
+    }, [startGameStatusMessage])
+
     // when new message sfrom socket recieved - update images
     const handleLatestMessage = useCallback((latestMessage) => {
         console.log(`handleLatestMessage ${JSON.stringify(latestMessage)}`);
+
         // construct board images array - only once on connect
         if (!boardIsSet) {
             // shuffle images
             if (latestMessage.hasOwnProperty('board')) {
+                console.log("set board");
                 const imageUrls = Array.from({ length: totalPairs }, (_, i) => `https://placedog.net/300/200?id=${i + 1}`);
                 const pairedImages = [...imageUrls, ...imageUrls];
                 let shuffledImages = latestMessage['board'].map(index => pairedImages[index]);
@@ -66,15 +85,6 @@ export default function Board() {
 
             return;
         }
-
-        // check if game started
-        if (latestMessage.hasOwnProperty("started")) {
-            alert("start game");
-            setGameIsActive(true);
-            setStatusMessage(startGameStatusMessage);
-            setNotClickable(false);
-        }
-
         // check message format
         if (latestMessage.hasOwnProperty('imageIdx')) {
             const imageIdx = latestMessage.imageIdx;
@@ -95,7 +105,7 @@ export default function Board() {
             setNotClickable(!latestMessage.canClick);
         }
 
-    }, [boardIsSet, totalPairs, squares.length, startGameStatusMessage]
+    }, [boardIsSet, totalPairs, squares.length]
     )
 
 
@@ -103,6 +113,12 @@ export default function Board() {
     useEffect(() => {
         addMessageHandler('board', handleLatestMessage);
     }, [addMessageHandler, handleLatestMessage]);
+
+    // set websocket on message function
+    useEffect(() => {
+        addMessageHandler('start', handleStartMesages);
+    }, [addMessageHandler, handleStartMesages]);
+
 
     function handleClick(idx) {
         if (notClickable) { return; }

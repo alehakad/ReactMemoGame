@@ -13,7 +13,6 @@ export const useWebSocket = () => {
 export const WebSocketProvider = ({ children }) => {
     const [messages, setMessages] = useState([]);
     const [wsStatus, setWsStatus] = useState("Disconnected");
-    const [isReady, setIsReady] = useState(false);
 
     const socketRef = useRef(null); // ref to hold WebSocket instance
     const messageHandlerRef = useRef(new Map()); // ref to hold on message function
@@ -25,21 +24,19 @@ export const WebSocketProvider = ({ children }) => {
     useEffect(() => {
 
         let clientId = Date.now();
-        const wsUrl = `ws://10.10.1.242:8000/ws/${clientId}`;
+        const wsUrl = `ws://127.0.0.1:8000/ws/${clientId}`;
+
+        console.log('Initializing WebSocket');
 
         socketRef.current = new WebSocket(wsUrl);
 
         socketRef.current.onopen = () => {
-            setIsReady(true);
             setWsStatus("Ready");
-            socketRef.current.send(JSON.stringify({ message: "Hello" }));
         }
         socketRef.current.onclose = () => {
-            setIsReady(false);
             setWsStatus("Closed");
         }
         socketRef.current.onmessage = (event) => {
-            console.log(event.data);
             const data = JSON.parse(event.data);
             setMessages((prevMessages) => [...prevMessages, data]);
             // send to appropriate handler by key to process the latest message
@@ -49,7 +46,6 @@ export const WebSocketProvider = ({ children }) => {
             }
         }
         socketRef.current.onerror = () => {
-            setIsReady(false);
             setWsStatus("Error");
         }
 
