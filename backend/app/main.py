@@ -41,6 +41,7 @@ class ConnectionManager:
     async def broadcast_json(self, message, client_id:int):
         for client, connection in self.active_connections.items():
             if client != client_id:
+                print(f"Send Message: {message} to client {client_id}")
                 await connection.send_json(message)
 
 
@@ -61,5 +62,6 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             except ValueError as e:
                 await websocket.send_json({"message": f"Error {e}"})
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
         await manager.broadcast_json({"message":f"Client #{client_id} diconnected"}, client_id)
+        manager.disconnect(client_id)
+        

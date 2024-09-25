@@ -1,6 +1,6 @@
 import './Board.css';
 import './Timer.css'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useWebSocket } from './Ws';
 import Timer from './Timer';
 
@@ -22,7 +22,7 @@ function Square({ xCoord, yCoord, isFlipped, imageUrl, onClickFunc }) {
 }
 
 export default function Board() {
-    const { messages, wsStatus, sendMessage } = useWebSocket();
+    const { sendMessage, setMessageHandler } = useWebSocket();
     // initialize game configs
     let startStatusMessage = "Pairs found: 0";
     let startSquares = Array(25).fill(false);
@@ -47,21 +47,17 @@ export default function Board() {
     const height = 4;
     const totalPairs = width * height / 2;
 
-    const imageUrls = Array.from({ length: totalPairs }, (_, i) => `https://placedog.net/300/200?id=${i + 1}`);
-    let pairedImages = [...imageUrls, ...imageUrls];
-
     // when new message sfrom socket recieved - update images
-    useEffect(() => {
-        if (messages.length === 0) return;
-
-        const latestMessage = messages[messages.length - 1];
-
+    const handleLatestMessage = useCallback((latestMessage) => {
+        console.log(`handleLatestMessage ${JSON.stringify(latestMessage)}`);
         // construct board images array - only once on connect
         if (!boardIsSet) {
             // shuffle images
             if (latestMessage.hasOwnProperty('board')) {
-                pairedImages = latestMessage['board'].map(index => pairedImages[index]);
-                setImages(pairedImages);
+                const imageUrls = Array.from({ length: totalPairs }, (_, i) => `https://placedog.net/300/200?id=${i + 1}`);
+                const pairedImages = [...imageUrls, ...imageUrls];
+                let shuffledImages = latestMessage['board'].map(index => pairedImages[index]);
+                setImages(shuffledImages);
                 setBoardIsSet(true);
                 setNotClickable(false);
             }
@@ -75,20 +71,28 @@ export default function Board() {
             if (imageIdx >= 0 && imageIdx <= squares.length) {
                 setSquares((prevSquares) => {
                     const nextSquares = [...prevSquares];
-                    nextSquares[imageIdx] = latestMessage.isOpen ? true : false;
+                    console.log(`Image request on ${imageIdx}, ${latestMessage.isOpen}`);
+                    nextSquares[imageIdx] = latestMessage.isOpen;
+                    console.log(nextSquares.toString());
                     return nextSquares;
                 });
+                return;
             }
         }
 
         // allow clickable to this player 
         if (latestMessage.hasOwnProperty('canClick')) {
-            setNotClickable(false);
+            setNotClickable(!latestMessage.canClick);
         }
 
-    }, [messages]
+    }, [boardIsSet, totalPairs, squares.length]
     )
 
+
+    // set websocket on message function
+    useEffect(() => {
+        setMessageHandler(handleLatestMessage);
+    }, [setMessageHandler, handleLatestMessage]);
 
     function handleClick(idx) {
         if (notClickable) { return; }
@@ -108,13 +112,15 @@ export default function Board() {
         sendMessage(JSON.stringify({ imageIdx: idx, isOpen: true }));
 
         // check after 2 seconds
-        setTimeout(() => {
-            if (openedImage !== null) {
+        if (openedImage !== null) {
+            setTimeout(() => {
                 if (images[openedImage] === images[idx]) {
 
                     // send message to websocket to open two images
-                    sendMessage(JSON.stringify({ imageIdx: idx, isOpen: true }));
-                    sendMessage(JSON.stringify({ imageIdx: openedImage, isOpen: true }));
+                    //sendMessage(JSON.stringify({ imageIdx: idx, isOpen: true }));
+                    //sendMessage(JSON.stringify({ imageIdx: openedImage, isOpen: true }));
+
+                    setNotClickable(false);
 
                     if (pairsFound + 1 === totalPairs) { // won the game
                         setStatusMessage("You won!!");
@@ -133,15 +139,15 @@ export default function Board() {
                     // send message to websocket to close two images
                     sendMessage(JSON.stringify({ imageIdx: idx, isOpen: false }));
                     sendMessage(JSON.stringify({ imageIdx: openedImage, isOpen: false }));
+
+                    // allow to click for other player
+                    sendMessage(JSON.stringify({ canClick: true }));
+
+                    setNotClickable(true); // wait until next turn
                 }
                 setOpenedImage(null);
-                setNotClickable(true); // wait until next turn
-
-                // allow to click for other player
-                sendMessage(JSON.stringify({ canClick: true }));
-
-            }
-        }, 1000);
+            }, 2000);
+        }
     }
 
     const rows = [];
