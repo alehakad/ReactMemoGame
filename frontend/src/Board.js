@@ -24,9 +24,11 @@ function Square({ xCoord, yCoord, isFlipped, imageUrl, onClickFunc }) {
 export default function Board() {
     const { sendMessage, addMessageHandler } = useWebSocket();
     // initialize game configs
-    let startStatusMessage = "Pairs found: 0";
+    let startStatusMessage = "Wait for other player";
     let startSquares = Array(25).fill(false);
     let startGameDuration = 120;
+
+    let startGameStatusMessage = "Pairs found : 0";
 
     const [squares, setSquares] = useState(startSquares);
     const [openedImage, setOpenedImage] = useState(null); // to pause between opening and checking image
@@ -35,7 +37,7 @@ export default function Board() {
     const [notClickable, setNotClickable] = useState(true); // to diallow opening third image and wait until turn
     const [images, setImages] = useState([]);
 
-    const [gameIsActive, setGameIsActive] = useState(true);
+    const [gameIsActive, setGameIsActive] = useState(false);
 
     const [gameDuration, setGameDuration] = useState(startGameDuration);
 
@@ -59,10 +61,18 @@ export default function Board() {
                 let shuffledImages = latestMessage['board'].map(index => pairedImages[index]);
                 setImages(shuffledImages);
                 setBoardIsSet(true);
-                setNotClickable(false);
+                setNotClickable(true);
             }
 
             return;
+        }
+
+        // check if game started
+        if (latestMessage.hasOwnProperty("started")) {
+            alert("start game");
+            setGameIsActive(true);
+            setStatusMessage(startGameStatusMessage);
+            setNotClickable(false);
         }
 
         // check message format
@@ -85,7 +95,7 @@ export default function Board() {
             setNotClickable(!latestMessage.canClick);
         }
 
-    }, [boardIsSet, totalPairs, squares.length]
+    }, [boardIsSet, totalPairs, squares.length, startGameStatusMessage]
     )
 
 

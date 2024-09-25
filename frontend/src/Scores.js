@@ -7,12 +7,6 @@ const ScoresDisplay = () => {
     const { addMessageHandler } = useWebSocket();
     const [players, setPlayers] = useState([]); // array of players with points
 
-    // const players = [
-    //     { name: 'Player 1', score: 100 },
-    //     { name: 'Player 2', score: 90 },
-    //     { name: 'Player 3', score: 80 },
-    // ];
-
     const handleLatestMessage = useCallback((latestMessage) => {
         if (latestMessage.hasOwnProperty('players')) {
             setPlayers(latestMessage['players']);

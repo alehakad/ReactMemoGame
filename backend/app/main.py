@@ -38,6 +38,8 @@ class GameConfigs:
     def get_score_table(self):
         return [{"name": name, "score" : score} for name, score in self.players_scores.items()]
 
+    def get_n_players(self):
+        return len(self.players_scores)
 
 
 class ConnectionManager:
@@ -62,10 +64,10 @@ class ConnectionManager:
             if client != client_id:
                 await connection.send_text(message)
 
-    async def broadcast_json(self, message, client_id:int=None):
+    async def broadcast_json(self, message, client_id:int=-1):
         for client, connection in self.active_connections.items():
             if client != client_id:
-                print(f"Send Message: {message} to client {client_id}")
+                print(f"Send Message: {message} to client {client}")
                 await connection.send_json(message)
 
 class AppManger:
@@ -81,6 +83,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
     app_manager.games_config.add_player(client_id)
     await app_manager.messages_manager.broadcast_json({"type":"points", "players" : app_manager.games_config.get_score_table()})
     print("Send table")
+    if app_manager.games_config.get_n_players() == 2:
+        await app_manager.messages_manager.broadcast_json({"type":"board", "started" : True})
 
     try:
         while True:
