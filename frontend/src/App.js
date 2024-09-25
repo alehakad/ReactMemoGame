@@ -1,6 +1,7 @@
 import './App.css';
 import Board from './Board';
 import { WebSocketProvider, useWebSocket } from './Ws';
+import ScoresDisplay from './Scores.js'
 
 const MessagesDisplay = () => {
   const { messages, wsStatus } = useWebSocket();
@@ -19,12 +20,12 @@ const MessagesDisplay = () => {
   )
 }
 
-
 export default function App() {
 
   return (
     <WebSocketProvider>
       <MessagesDisplay />
+      <ScoresDisplay />
       <div className="App">
         <Board />
       </div>

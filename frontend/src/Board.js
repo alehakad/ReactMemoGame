@@ -22,7 +22,7 @@ function Square({ xCoord, yCoord, isFlipped, imageUrl, onClickFunc }) {
 }
 
 export default function Board() {
-    const { sendMessage, setMessageHandler } = useWebSocket();
+    const { sendMessage, addMessageHandler } = useWebSocket();
     // initialize game configs
     let startStatusMessage = "Pairs found: 0";
     let startSquares = Array(25).fill(false);
@@ -91,8 +91,8 @@ export default function Board() {
 
     // set websocket on message function
     useEffect(() => {
-        setMessageHandler(handleLatestMessage);
-    }, [setMessageHandler, handleLatestMessage]);
+        addMessageHandler('board', handleLatestMessage);
+    }, [addMessageHandler, handleLatestMessage]);
 
     function handleClick(idx) {
         if (notClickable) { return; }
@@ -109,7 +109,7 @@ export default function Board() {
         nextSquares[idx] = !nextSquares[idx];
         setSquares(nextSquares);
         // send open image
-        sendMessage(JSON.stringify({ imageIdx: idx, isOpen: true }));
+        sendMessage(JSON.stringify({ type: 'board', imageIdx: idx, isOpen: true }));
 
         // check after 2 seconds
         if (openedImage !== null) {
@@ -117,8 +117,8 @@ export default function Board() {
                 if (images[openedImage] === images[idx]) {
 
                     // send message to websocket to open two images
-                    //sendMessage(JSON.stringify({ imageIdx: idx, isOpen: true }));
-                    //sendMessage(JSON.stringify({ imageIdx: openedImage, isOpen: true }));
+                    //sendMessage(JSON.stringify({type: 'board', imageIdx: idx, isOpen: true }));
+                    //sendMessage(JSON.stringify({type: 'board', imageIdx: openedImage, isOpen: true }));
 
                     setNotClickable(false);
 
@@ -130,6 +130,8 @@ export default function Board() {
                         setStatusMessage(`Pairs found: ${pairsFound + 1}`);
                     }
                     setPairsFound(pairsFound + 1);
+                    // setMessage to update leaderbord
+                    sendMessage(JSON.stringify({ type: 'points', points: 1 }))
                 }
                 else {
                     nextSquares[idx] = false;
@@ -137,11 +139,11 @@ export default function Board() {
                     setSquares(nextSquares);
 
                     // send message to websocket to close two images
-                    sendMessage(JSON.stringify({ imageIdx: idx, isOpen: false }));
-                    sendMessage(JSON.stringify({ imageIdx: openedImage, isOpen: false }));
+                    sendMessage(JSON.stringify({ type: 'board', imageIdx: idx, isOpen: false }));
+                    sendMessage(JSON.stringify({ type: 'board', imageIdx: openedImage, isOpen: false }));
 
                     // allow to click for other player
-                    sendMessage(JSON.stringify({ canClick: true }));
+                    sendMessage(JSON.stringify({ type: 'board', canClick: true }));
 
                     setNotClickable(true); // wait until next turn
                 }
@@ -193,6 +195,7 @@ export default function Board() {
 
     return (
         <div className='Board'>
+
             <Timer key={timerKey} isActive={gameIsActive} onTimeUp={handleTimeUp} duration={gameDuration} />
             <div className='status'>{statusMessage}</div>
             <button className='restart-button' onClick={restartGame}>Restart</button>

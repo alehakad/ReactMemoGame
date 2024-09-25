@@ -1,0 +1,46 @@
+/* Leaderboard Container */
+.leaderboard-container {
+    position: fixed; /* Fixes the leaderboard to the left */
+    top: 20px; /* Distance from the top of the screen */
+    left: 20px; /* Distance from the left of the screen */
+    width: 300px; /* Set the width of the leaderboard */
+    background-color: rgba(255, 255, 255, 0.8); /* White background with some transparency */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Shadow for a 3D effect */
+    padding: 20px; /* Inner padding */
+    z-index: 1000; /* Ensure it’s on top of other elements */
+}
+
+/* Table Styles */
+.leaderboard-table {
+    width: 100%; /* Full width of the container */
+    border-collapse: collapse; /* Merge borders */
+}
+
+/* Table Header */
+.leaderboard-table thead {
+    background-color: #4CAF50; /* Header background color */
+    color: white; /* Header text color */
+}
+
+/* Table Header Cells */
+.leaderboard-table th {
+    padding: 10px; /* Padding for header cells */
+    text-align: left; /* Align text to the left */
+}
+
+/* Table Body Cells */
+.leaderboard-table td {
+    padding: 8px; /* Padding for body cells */
+    border-bottom: 1px solid #ddd; /* Border below each row */
+}
+
+/* Alternate Row Color */
+.leaderboard-table tr:nth-child(even) {
+    background-color: #f2f2f2; /* Light gray background for even rows */
+}
+
+/* Hover Effect */
+.leaderboard-table tr:hover {
+    background-color: #ddd; /* Change background on hover */
+}

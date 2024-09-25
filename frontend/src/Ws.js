@@ -16,10 +16,10 @@ export const WebSocketProvider = ({ children }) => {
     const [isReady, setIsReady] = useState(false);
 
     const socketRef = useRef(null); // ref to hold WebSocket instance
-    const messageHandlerRef = useRef(null); // ref to hold on message function
+    const messageHandlerRef = useRef(new Map()); // ref to hold on message function
 
-    const setMessageHandler = useCallback((handler) => {
-        messageHandlerRef.current = handler;
+    const addMessageHandler = useCallback((key, handler) => {
+        messageHandlerRef.current.set(key, handler);
     }, []);
 
     useEffect(() => {
@@ -42,9 +42,10 @@ export const WebSocketProvider = ({ children }) => {
             console.log(event.data);
             const data = JSON.parse(event.data);
             setMessages((prevMessages) => [...prevMessages, data]);
-            // send to board to handle the latest message
-            if (messageHandlerRef.current) {
-                messageHandlerRef.current(data);
+            // send to appropriate handler by key to process the latest message
+            if (messageHandlerRef.current.has(data.type)) {
+                const handler = messageHandlerRef.current.get(data.type);
+                handler(data);
             }
         }
         socketRef.current.onerror = () => {
@@ -70,7 +71,7 @@ export const WebSocketProvider = ({ children }) => {
     }
 
     return (
-        <WebSocketContext.Provider value={{ messages, wsStatus, sendMessage, setMessageHandler}}>
+        <WebSocketContext.Provider value={{ messages, wsStatus, sendMessage, addMessageHandler }}>
             {children}
         </WebSocketContext.Provider>
     )
